@@ -1,5 +1,4 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import LoadingIndicator from "/components/LoadingIndicator.vue";
 import ErrorMessageIndicator from "/components/ErrorMessageIndicator.vue";
@@ -7,15 +6,17 @@ import EmptyIndicator from "/components/EmptyIndicator.vue";
 import { useAsyncFetch } from "/composables/useAsyncFetch";
 import heart from "../assets/Vector (1).svg";
 import fillHeart from "../assets/Fill-heart.svg";
+import { useCart } from '../composables/useCart'; 
+import { useWishlist } from '../composables/useWishlist'; 
 
 const categories = ref([]);
 const selectedFilter = ref("ALL");
 const filters = ref(["ALL"]);
 const products = ref([]);
-
-const loading = ref(false);
-const error = ref(null);
 const isEmpty = ref(false);
+
+const { favoriteIds, loading, error, fetchFavorites,addToFavorites, removeFromFavorites } = useWishlist();
+const {  loadproduct,addToCart} = useCart();
 
 const router = useRouter();
 
@@ -66,7 +67,10 @@ const fetchProducts = async (categoryId) => {
     if (status === "success" && data.products.length > 0) {
       products.value = data.products;
       isEmpty.value = false;
-      isFavorite: false
+      products.value = data.products.map((product) => ({
+        ...product,
+        isFavorite: favoriteIds.value.includes(product._id),
+      }));
 
     } else {
       isEmpty.value = true;
@@ -77,16 +81,24 @@ const fetchProducts = async (categoryId) => {
     loading.value = false;
   }
 };
-
-onMounted(fetchCategories);
+onMounted(async () => {
+  await fetchFavorites();
+  fetchCategories();
+});
 
 const filteredCategories = computed(() => {
   return selectedFilter.value === "ALL"
     ? categories.value
     : categories.value.filter((c) => c.type === selectedFilter.value);
 });
-const toggleFavorite = (product) => {
-  product.isFavorite = !product.isFavorite;
+const toggleFavorite = async (product) => {
+  if (product.isFavorite) {
+    await removeFromFavorites(product._id);
+    product.isFavorite = false;
+  } else {
+    await addToFavorites(product);
+    product.isFavorite = true;
+  }
 };
 const handleFilterClick = (category) => {
   console.log(category);
@@ -103,29 +115,7 @@ const handleFilterClick = (category) => {
     products.value = [];
   }
 };
-const addToCart = async (productId, quantity=1) => {
-  try {
-    const { data, status, message } = await useAsyncFetch('POST', '/api/v1/cart', { product: productId, quantity: quantity });
 
-    if (status === 'success') {
-      useToastify.success("Product successfully added to cart", {
-        autoClose: 1000,
-        position: ToastifyOption.POSITION.BOTTOM_RIGHT,
-        type: ToastifyOption.TYPE.SUCCESS,
-      });
-      console.log('Item added to cart successfully:', data);
-    } else {
-      throw new Error(message || "Failed to add product to cart.");
-    }
-  } catch (err) {
-    useToastify.error(err.message, {
-      autoClose: 3000,
-      position: ToastifyOption.POSITION.BOTTOM_RIGHT,
-      type: ToastifyOption.TYPE.ERROR,
-    });
-    console.error('Failed to add item to cart:', err.message);
-  }
-};
 </script>
 
 <template>
@@ -170,7 +160,7 @@ const addToCart = async (productId, quantity=1) => {
     </div>
 
     <!-- Category Cards -->
-    <div v-else class="flex flex-wrap px-10 gap-5 justify-center items-center">
+    <div v-else class="flex flex-wrap px-10 gap-5 justify-center items-center pb-5">
       <div
         v-if="selectedFilter === 'ALL'"
         v-for="item in filteredCategories"
@@ -193,7 +183,7 @@ const addToCart = async (productId, quantity=1) => {
 
     <!-- Product Cards -->
 
-    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3 justify-center my-4">
+    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3 justify-center my-4 pb-5">
       <div
         v-for="(product, index) in products"
         :key="product._id"
