@@ -110,8 +110,8 @@ watch([showSignUp, showLogin, showForgetPassword], ([signup, login, forgetPasswo
         <nuxt-link @click="toggleMenu" to="/About" class="w-28 text-center text-xl font-normal font-cairo" exact-active-class="active-link">About</nuxt-link>
         <nuxt-link @click="toggleMenu" to="/ContactUs" class="w-40 text-center text-xl font-normal font-cairo" exact-active-class="active-link">Contact-Us</nuxt-link>
         <template v-if="!isLoggedIn">
-          <button @click="switchToSignup(); toggleMenu()" class="border rounded-xl p-2 px-3 ml-2 bg-white text-indigo-950">Signup</button>
-          <button @click="switchToLogin(); toggleMenu()" class="border rounded-xl p-2 ml-2 px-3">Login</button>
+          <button @click="switchToSignup(); toggleMenu()" class=" rounded-xl p-2 px-3 ml-2 text-white bg-indigo-950">Signup</button>
+          <button @click="switchToLogin(); toggleMenu()" class="border border-indigo-950 rounded-xl p-2 ml-2 px-3">Login</button>
         </template>
         <template v-else>
           <button @click="logout(); toggleMenu()" class="border rounded-xl p-2 ml-2 px-3 bg-red-500 text-white">Logout</button>
@@ -128,8 +128,8 @@ watch([showSignUp, showLogin, showForgetPassword], ([signup, login, forgetPasswo
 
       <div class="w-auto hidden md:flex justify-between items-center">
         <template v-if="!isLoggedIn">
-          <button @click="switchToSignup" class="border rounded-xl p-2 px-3 ml-2 bg-white text-indigo-950">Signup</button>
-          <button @click="switchToLogin" class="border rounded-xl p-2 ml-2 px-3">Login</button>
+          <button @click="switchToSignup" class=" rounded-xl p-2 px-3 ml-2 text-white bg-indigo-950">Signup</button>
+          <button @click="switchToLogin" class="border rounded-xl p-2 ml-2 px-3 text-indigo-950 border-indigo-950">Login</button>
         </template>
 
         <!-- After Login -->
