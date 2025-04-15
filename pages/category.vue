@@ -103,6 +103,29 @@ const handleFilterClick = (category) => {
     products.value = [];
   }
 };
+const addToCart = async (productId, quantity=1) => {
+  try {
+    const { data, status, message } = await useAsyncFetch('POST', '/api/v1/cart', { product: productId, quantity: quantity });
+
+    if (status === 'success') {
+      useToastify.success("Product successfully added to cart", {
+        autoClose: 1000,
+        position: ToastifyOption.POSITION.BOTTOM_RIGHT,
+        type: ToastifyOption.TYPE.SUCCESS,
+      });
+      console.log('Item added to cart successfully:', data);
+    } else {
+      throw new Error(message || "Failed to add product to cart.");
+    }
+  } catch (err) {
+    useToastify.error(err.message, {
+      autoClose: 3000,
+      position: ToastifyOption.POSITION.BOTTOM_RIGHT,
+      type: ToastifyOption.TYPE.ERROR,
+    });
+    console.error('Failed to add item to cart:', err.message);
+  }
+};
 </script>
 
 <template>
@@ -170,7 +193,7 @@ const handleFilterClick = (category) => {
 
     <!-- Product Cards -->
 
-    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3 justify-center">
+    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3 justify-center my-4">
       <div
         v-for="(product, index) in products"
         :key="product._id"
@@ -193,8 +216,7 @@ const handleFilterClick = (category) => {
                 class="w-6 h-6"
               />
             </button>
-            <!-- @click="addToCart(product._id)" -->
-            <button>
+            <button @click="addToCart(product._id)">
               <img src="../assets/Vector (3).svg" class="w-6 h-6" />
             </button>
           </div>
