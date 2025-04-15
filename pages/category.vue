@@ -5,6 +5,8 @@ import LoadingIndicator from "/components/LoadingIndicator.vue";
 import ErrorMessageIndicator from "/components/ErrorMessageIndicator.vue";
 import EmptyIndicator from "/components/EmptyIndicator.vue";
 import { useAsyncFetch } from "/composables/useAsyncFetch";
+import heart from "../assets/Vector (1).svg";
+import fillHeart from "../assets/Fill-heart.svg";
 
 const categories = ref([]);
 const selectedFilter = ref("ALL");
@@ -25,7 +27,7 @@ const fetchCategories = async () => {
   try {
     const { data, status, message } = await useAsyncFetch(
       "GET",
-      "/api/v1/categories/"
+      "/pi/v1/categories/"
     );
 
     if (status === "success" && data.categories.length > 0) {
@@ -64,6 +66,8 @@ const fetchProducts = async (categoryId) => {
     if (status === "success" && data.products.length > 0) {
       products.value = data.products;
       isEmpty.value = false;
+      isFavorite: false
+
     } else {
       isEmpty.value = true;
     }
@@ -81,7 +85,9 @@ const filteredCategories = computed(() => {
     ? categories.value
     : categories.value.filter((c) => c.type === selectedFilter.value);
 });
-
+const toggleFavorite = (product) => {
+  product.isFavorite = !product.isFavorite;
+};
 const handleFilterClick = (category) => {
   console.log(category);
 
@@ -164,7 +170,7 @@ const handleFilterClick = (category) => {
 
     <!-- Product Cards -->
 
-    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3">
+    <div v-if="products.length > 0" class="flex flex-row flex-wrap gap-3 justify-center">
       <div
         v-for="(product, index) in products"
         :key="product._id"
@@ -181,8 +187,7 @@ const handleFilterClick = (category) => {
             Price : {{ product.price }} LE
           </p>
           <div class="flex gap-4">
-            <!-- @click="toggleFavorite(product)" -->
-            <button>
+            <button @click="toggleFavorite(product)">
               <img
                 :src="product.isFavorite ? fillHeart : heart"
                 class="w-6 h-6"
