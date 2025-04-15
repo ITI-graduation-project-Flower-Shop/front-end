@@ -25,7 +25,7 @@ const fetchCategories = async () => {
   try {
     const { data, status, message } = await useAsyncFetch(
       "GET",
-      "/pi/v1/categories/"
+      "/api/v1/categories/"
     );
 
     if (status === "success" && data.categories.length > 0) {
